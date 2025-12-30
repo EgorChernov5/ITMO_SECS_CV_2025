@@ -27,10 +27,9 @@ def load_PetImages(dst_path: str):
 def get_dataloaders(
     data_dir,
     batch_size=32,
-    train_ratio=0.7,
-    val_ratio=0.15
+    val_ratio=0.2
     ):
-    assert train_ratio + val_ratio < 1.0
+    assert val_ratio < 1.0
 
     load_PetImages(data_dir)
 
@@ -55,18 +54,16 @@ def get_dataloaders(
     dataset = datasets.ImageFolder(root=data_dir)
 
     total_size = len(dataset)
-    train_size = int(train_ratio * total_size)
-    val_size = int(val_ratio * total_size)
-    test_size = total_size - train_size - val_size
+    val_size = int(val_ratio*total_size)
+    train_size = total_size - val_size
 
-    train_ds, val_ds, test_ds = random_split(
+    train_ds, val_ds = random_split(
         dataset,
-        [train_size, val_size, test_size]
+        [train_size, val_size]
     )
 
     train_ds.dataset.transform = train_transform
     val_ds.dataset.transform = val_transform
-    test_ds.dataset.transform = val_transform
 
     train_loader = DataLoader(
         train_ds,
@@ -79,6 +76,11 @@ def get_dataloaders(
         batch_size=batch_size,
         shuffle=False,
         num_workers=4
+    )
+
+    test_ds = datasets.ImageFolder(
+        root=data_dir.replace('input', 'output'),
+        transform=val_transform
     )
     test_loader = DataLoader(
         test_ds,
