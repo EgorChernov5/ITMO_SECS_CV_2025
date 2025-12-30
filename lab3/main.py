@@ -37,7 +37,7 @@ def main():
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
     # Train
-    train_model(
+    train_losses, val_losses, train_accs, val_accs = train_model(
         model,
         train_loader, val_loader,
         epochs,
@@ -46,8 +46,18 @@ def main():
         DEVICE
     )
 
-    # Evaluate
+    # Evaluate and vis
     evaluate(model, test_loader, criterion, DEVICE)
+    visualize_losses_metrics(
+        train_losses,
+        val_losses,
+        train_accs,
+        val_accs,
+        str(Path(args.outdir) / 'graph_vis.png'),
+        figsize=(10, 4),
+        dpi=300,
+        show=False
+    )
 
 
 if __name__ == '__main__':

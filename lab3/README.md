@@ -79,11 +79,12 @@ self.backbone.fc = nn.Sequential(
 
 ### 2.3 Архитектура кода
 
-* `utils.get_dataloaders` - загрузка данных и формирование DataLoader для train, val, test.
-* `sobel_opencv(img)` - возвращает изображение градиентов (uint8) и время выполнения.
-* `sobel_native_loops(img)` - нативная реализация через вложенные циклы.
-* `sobel_native_vectorized(img)` - векторизованная версия на NumPy (с использованием сдвигов/срезов).
-* `benchmark(funcs, img, runs=10)` - прогоняет каждую функцию `runs` и возвращает среднее время и стандартное отклонение.
+* `utils.get_dataloaders` - загрузка данных и формирование `DataLoader` для `train`, `val`, `test`.
+* `utils.train_model` - функция для обучения модели. Возвращает списки с ошибками и метриками.
+* `utils.evaluate` - оценивает качество модели.
+* `utils.visualize_losses_metrics` - визуализирует графики ошибок и метрик.
+* `models.CustomResNet50` - модель `ResNet50` с кастомным классификатором.
+* `models.SimpleCNN` - простая `CNN` модель.
 
 > З.Ы. Структура папок должна быть как на изображении:
 >
@@ -92,26 +93,22 @@ self.backbone.fc = nn.Sequential(
 
 ## 3. Результаты работы и тестирования системы
 
-Исходное изображение:
+Примеры собранных изображений:
 
-![Лена](data/inputs/lena.png)
+- Cats:
 
-После прохождение через фильтр Собеля:
+![cats](data/input/cats.png)
 
-![Лена после Собеля](data/outputs/output_opencv.png)
+- Dogs:
 
-Время выполнения реализаций:
+![dogs](data/input/dogs.png)
 
-| Реализация        | Время | Mean std |
-|-------------------|-------|----------|
-| opencv            | 0.011 | 0.0004   |
-| native_loops      | 5.4   | 0.4      |
-| native_vectorized | 0.02  | 0.0013   |
+Результаты работы :
 
-Полученные закономерности:
-
-* OpenCV-реализация в десятки раз быстрее чистых Python-циклов и конкурентоспособна с векторизованной NumPy-реализацией.
-* Нативная векторизованная версия даёт компромисс между читаемым кодом и производительностью.
+| Реализация        | Loss     | Accuracy |
+|-------------------|----------|----------|
+| CustomResNet50    | 0.0004   |          |
+| SimpleCNN         | 0.79     | 0.57     |
 
 ---
 
@@ -127,7 +124,8 @@ self.backbone.fc = nn.Sequential(
 
 ## 5. Использованные источники
 
-* Документация [OpenCV](https://docs.opencv.org/4.x/d2/d2c/tutorial_sobel_derivatives.html).
+* [Датасет](https://www.kaggle.com/datasets/bhavikjikadara/dog-and-cat-classification-dataset/data).
+* [CustomResNet50](https://www.kaggle.com/code/jasminemohamed2545/dog-vs-cat-resnet50-98-3-acc#2.-Loading-and-Processing-Data).
 
 ---
 
@@ -143,7 +141,7 @@ cd lab3
 pip install -r requirements.txt
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu        # Если CPU
 # pip install torch torchvision --index-url https://download.pytorch.org/whl/cu126    # Если GPU (см. https://pytorch.org/get-started/locally/)
-sudo apt install graphviz    # Для визуализации Linux (Windows - https://graphviz.gitlab.io/download/)
+# sudo apt install graphviz    # Для визуализации Linux (Windows - https://graphviz.gitlab.io/download/)
 ```
 
 2. Запустите работу через `make`:
@@ -154,8 +152,6 @@ make lab3
 
 Скрипт сгенерирует и сохранит:
 
-* `output_opencv.png` - результат OpenCV
-* `output_native_loops.png` - результат нативной реализации с циклами
-* `output_native_vectorized.png` - результат векторизованной реализации
-* `benchmark_times.png` - график сравнения времени выполнения
-* `benchmark_results.csv` - таблица с результатами тестов
+
+* В output будет выведен процесс обучения и метрики качества.
+* `graph_vis_simplecnn.png` - графики ошибок и метрики при обучении.
