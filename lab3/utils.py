@@ -1,3 +1,4 @@
+import os
 import shutil
 from pathlib import Path
 import kagglehub
@@ -180,11 +181,32 @@ def evaluate(model, loader, criterion, device):
     return running_loss / total, correct / total
 
 
-def visualize_losses_metrics(train_losses, val_losses, train_accs, val_accs, figsize=(10, 4)):
-    # Строим графики
+def visualize_losses_metrics(
+    train_losses,
+    val_losses,
+    train_accs,
+    val_accs,
+    save_path,
+    figsize=(10, 4),
+    dpi=300,
+    show=False
+):
+    """
+    Сохраняет графики loss и accuracy в файл.
+
+    Args:
+        train_losses (list): потери на обучении
+        val_losses (list): потери на валидации
+        train_accs (list): accuracy на обучении
+        val_accs (list): accuracy на валидации
+        save_path (str): путь к файлу (например 'plots/metrics.png')
+        figsize (tuple): размер фигуры
+        dpi (int): разрешение картинки
+        show (bool): показывать ли график
+    """
     plt.figure(figsize=figsize)
 
-    # График потерь
+    # Loss
     plt.subplot(1, 2, 1)
     plt.plot(train_losses, label='Train loss')
     plt.plot(val_losses, label='Val loss')
@@ -194,7 +216,7 @@ def visualize_losses_metrics(train_losses, val_losses, train_accs, val_accs, fig
     plt.legend()
     plt.grid(True)
 
-    # График точности
+    # Accuracy
     plt.subplot(1, 2, 2)
     plt.plot(train_accs, label='Train accuracy')
     plt.plot(val_accs, label='Val accuracy')
@@ -205,4 +227,9 @@ def visualize_losses_metrics(train_losses, val_losses, train_accs, val_accs, fig
     plt.grid(True)
 
     plt.tight_layout()
-    plt.show()
+    plt.savefig(save_path, dpi=dpi, bbox_inches='tight')
+
+    if show:
+        plt.show()
+
+    plt.close()
