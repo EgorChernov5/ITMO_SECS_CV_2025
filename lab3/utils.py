@@ -1,7 +1,9 @@
 import shutil
 from pathlib import Path
 import kagglehub
+from tqdm import tqdm
 
+import torch
 from torch.utils.data import DataLoader, random_split
 from torchvision import datasets, transforms
 
@@ -90,3 +92,88 @@ def get_dataloaders(
     )
 
     return train_loader, val_loader, test_loader
+
+
+def train_one_epoch(model, loader, optimizer, criterion, device):
+    model.train()
+    running_loss = 0.0
+    correct = 0
+    total = 0
+
+    for images, labels in tqdm(loader):
+        images = images.to(device)
+        labels = labels.float().unsqueeze(1).to(device)
+
+        optimizer.zero_grad()
+
+        logits = model(images)
+        loss = criterion(logits, labels)
+
+        loss.backward()
+        optimizer.step()
+
+        probs = torch.sigmoid(logits)
+        preds = (probs > 0.5).float()
+
+        correct += (preds == labels).sum().item()
+        total += labels.size(0)
+        running_loss += loss.item() * labels.size(0)
+
+    return running_loss / total, correct / total
+
+
+def train_model(
+        model,
+        train_loader, val_loader,
+        epochs,
+        criterion,
+        optimizer,
+        device='cpu'):
+    train_losses = []
+    val_losses = []
+    train_accs = []
+    val_accs = []
+    for epoch in range(epochs):
+        train_loss, train_acc = train_one_epoch(
+            model, train_loader, optimizer, criterion, device
+        )
+
+        val_loss, val_acc = evaluate(
+            model, val_loader, criterion, device
+        )
+
+        print(
+            f"Epoch [{epoch+1}/{epochs}] "
+            f"Train Loss: {train_loss:.4f} | Train Acc: {train_acc:.4f} "
+            f"Val Loss: {val_loss:.4f} | Val Acc: {val_acc:.4f}"
+        )
+        train_losses.append(train_loss)
+        val_losses.append(val_loss)
+        train_accs.append(train_acc)
+        val_accs.append(val_acc)
+
+    return train_losses, val_losses, train_accs, val_accs
+
+
+@torch.no_grad()
+def evaluate(model, loader, criterion, device):
+    model.eval()
+    running_loss = 0.0
+    correct = 0
+    total = 0
+
+    for images, labels in loader:
+        images = images.to(device)
+        labels = labels.float().unsqueeze(1).to(device)
+
+        logits = model(images)
+        loss = criterion(logits, labels)
+
+        probs = torch.sigmoid(logits)
+        preds = (probs > 0.5).float()
+
+        correct += (preds == labels).sum().item()
+        total += labels.size(0)
+        running_loss += loss.item() * labels.size(0)
+
+    return running_loss / total, correct / total

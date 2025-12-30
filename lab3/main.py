@@ -1,49 +1,53 @@
 import os
-import argparse
-import kagglehub
 from pathlib import Path
-
-from sklearn.model_selection import train_test_split
+import argparse
 
 import torch
+import torch.nn as nn
+import torch.optim as optim
 
 from dotenv import load_dotenv
-
 load_dotenv()
+
+from lab3.utils import *
+from lab3.models import CustomResNet50, SimpleCNN
+
 
 PATH_DATA = Path(os.getenv('PATH_DATA'))
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-print(f'Using {DEVICE} for inference')
 
-
-def load_dataset(dst_path: str):
-    # Download latest version
-    path = kagglehub.dataset_download(handle='bhavikjikadara/dog-and-cat-classification-dataset', path=dst_path)
-
-    print("Path to dataset files:", path)
-    X_train, test_df = train_test_split(all_df, test_size=0.2, random_state=42, stratify=all_df['Labels'])
-
-
-    return X_train, X_val, X_test, y_train, y_val, y_test
-
-
-def get_model_resnet50():
-    resnet50 = torch.hub.load('NVIDIA/DeepLearningExamples:torchhub', 'nvidia_resnet50', pretrained=True)
-    resnet50.eval().to(DEVICE)
-
-    
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--input', required=True)
-    parser.add_argument('--runs', type=int, default=10)
-    parser.add_argument('--outdir', default='out')
+    parser.add_argument('--input', type=str, default='./data/input/PetImages')
+    parser.add_argument('--epochs', type=int, default=10)
+    parser.add_argument('--outdir', type=str, default='./data/output')
     args = parser.parse_args()
 
-    dst_path = PATH_DATA / 'input'
-    X_train, X_val, X_test, y_train, y_val, y_test = load_dataset(str(dst_path))
-    
-    
+    train_loader, val_loader, test_loader = get_dataloaders(epochs.input)
+
+    # model = CustomResNet50()
+    model = SimpleCNN()
+
+    # Parameters
+    epochs = args.epochs
+    lr = 1e-3
+
+    criterion = nn.BCEWithLogitsLoss()
+    optimizer = optim.Adam(model.parameters(), lr=lr)
+
+    # Train
+    train_model(
+        model,
+        train_loader, val_loader,
+        epochs,
+        criterion,
+        optimizer,
+        DEVICE
+    )
+
+    # Evaluate
+    evaluate(model, test_loader, criterion, DEVICE)
 
 
 if __name__ == '__main__':
