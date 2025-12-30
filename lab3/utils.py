@@ -2,6 +2,7 @@ import shutil
 from pathlib import Path
 import kagglehub
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 import torch
 from torch.utils.data import DataLoader, random_split
@@ -177,3 +178,31 @@ def evaluate(model, loader, criterion, device):
         running_loss += loss.item() * labels.size(0)
 
     return running_loss / total, correct / total
+
+
+def visualize_losses_metrics(train_losses, val_losses, train_accs, val_accs, figsize=(10, 4)):
+    # Строим графики
+    plt.figure(figsize=figsize)
+
+    # График потерь
+    plt.subplot(1, 2, 1)
+    plt.plot(train_losses, label='Train loss')
+    plt.plot(val_losses, label='Val loss')
+    plt.xlabel('Эпоха')
+    plt.ylabel('Loss')
+    plt.title('Изменение функции потерь')
+    plt.legend()
+    plt.grid(True)
+
+    # График точности
+    plt.subplot(1, 2, 2)
+    plt.plot(train_accs, label='Train accuracy')
+    plt.plot(val_accs, label='Val accuracy')
+    plt.xlabel('Эпоха')
+    plt.ylabel('Accuracy')
+    plt.title('Изменение точности')
+    plt.legend()
+    plt.grid(True)
+
+    plt.tight_layout()
+    plt.show()
