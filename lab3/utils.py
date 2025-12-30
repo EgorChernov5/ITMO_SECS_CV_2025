@@ -88,7 +88,7 @@ def get_dataloaders(
     )
     test_loader = DataLoader(
         test_ds,
-        batch_size=batch_size,
+        batch_size=5,
         shuffle=False,
         num_workers=4
     )
