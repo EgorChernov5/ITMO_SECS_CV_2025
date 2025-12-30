@@ -1,0 +1,5 @@
+kagglehub
+python-dotenv
+scikit-learn
+graphviz
+hiddenlayer
